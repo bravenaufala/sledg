@@ -9,6 +9,7 @@ var run_state: RunState = RunState.RUNNING
 var total_distance: float = 0.0
 var bonus_points: int = 0
 var score: int = 0
+var _last_shield_count: int = 0
 
 @onready var track_spawner: Node3D = $TrackSpawner
 @onready var player: CharacterBody3D = $Player
@@ -61,25 +62,38 @@ func _on_boost_activated(_duration: float) -> void:
 
 
 func _on_player_powerup_changed(id: StringName, active: bool, remaining: float) -> void:
-	if hud:
-		hud.set_powerup_status(id, active, remaining)
-		if active:
-			hud.show_status("SHIELD READY!" if id == &"shield" else "BOOST POWER-UP!", 1.3)
-		elif id == &"shield" and run_state == RunState.RUNNING:
-			hud.show_status("SHIELD BLOCKED HIT!", 1.3)
+	if hud and player:
+		hud.set_powerup_status(
+			id,
+			active,
+			remaining,
+			player.shield_count,
+			player.shields_consumed,
+			player.boost_stacks
+		)
+		if id == &"shield":
+			if player.shield_count > _last_shield_count:
+				hud.show_status("SHIELD x%d!" % player.shield_count, 1.3)
+			elif run_state == RunState.RUNNING:
+				hud.show_status("SHIELD BLOCKED HIT!", 1.3)
+			_last_shield_count = player.shield_count
+		elif active:
+			hud.show_status("BOOST x%d!" % player.boost_stacks, 1.3)
 
 
 func _on_player_crashed() -> void:
 	run_state = RunState.GAME_OVER
 	score = int(total_distance) + bonus_points
+	var shields_used: int = int(player.get("shields_consumed")) if player else 0
 	if hud:
-		hud.show_game_over(score, int(total_distance), bonus_points)
+		hud.show_game_over(score, int(total_distance), bonus_points, shields_used)
 
 
 func start_new_run() -> void:
 	total_distance = 0.0
 	bonus_points = 0
 	score = 0
+	_last_shield_count = 0
 	run_state = RunState.RUNNING
 	if track_spawner:
 		track_spawner.reset_track()

@@ -7,6 +7,8 @@ signal powerup_changed(id: StringName, active: bool, remaining: float)
 
 @export var slope_gravity_scale: float = 2.5
 @export var max_downhill_speed: float = 28.0
+@export var safety_speed_ceiling: float = 150.0
+@export var boost_stack_base: float = 1.25
 @export var ice_friction: float = 0.12
 @export var steer_speed: float = 10.0
 @export var steer_accel: float = 14.0
@@ -30,7 +32,9 @@ var boost_multiplier: float = 1.0
 var base_fov: float = 75.0
 var target_fov_bonus: float = 0.0
 
-var has_shield: bool = false
+var shield_count: int = 0
+var shields_consumed: int = 0
+var boost_stacks: int = 0
 var speed_multiplier: float = 1.0
 var _powerup_timer: float = 0.0
 var _active_powerup_id: StringName = &""
@@ -79,6 +83,7 @@ func _physics_process(delta: float) -> void:
 	if _powerup_timer > 0.0:
 		_powerup_timer = maxf(0.0, _powerup_timer - delta)
 		if _powerup_timer <= 0.0:
+			boost_stacks = 0
 			speed_multiplier = 1.0
 			if boost_timer <= 0.0:
 				target_fov_bonus = 0.0
@@ -91,23 +96,27 @@ func _physics_process(delta: float) -> void:
 	if is_zero_approx(steer_input):
 		steer_input = Input.get_axis("ui_left", "ui_right")
 
-	lateral_speed = move_toward(lateral_speed, steer_input * steer_speed, steer_accel * delta)
+	var speed_ratio := clampf(downhill_speed / maxf(1.0, max_downhill_speed), 1.0, 3.5)
+	var current_steer_speed := steer_speed * (1.0 + (speed_ratio - 1.0) * 0.35)
+	var current_steer_accel := steer_accel * (1.0 + (speed_ratio - 1.0) * 0.45)
+	lateral_speed = move_toward(lateral_speed, steer_input * current_steer_speed, current_steer_accel * delta)
 
-	var effective_max := max_downhill_speed * _effective_speed_mult()
 	var grounded := is_on_floor() and airborne_grace_timer <= 0.0
 
 	if grounded:
 		floor_snap_length = 0.15
 		if not was_on_floor:
-			downhill_speed = clampf(maxf(downhill_speed, Vector2(velocity.y, velocity.z).length()), 0.0, effective_max)
+			downhill_speed = clampf(maxf(downhill_speed, Vector2(velocity.y, velocity.z).length()), 0.0, safety_speed_ceiling)
 		var floor_normal := get_floor_normal()
 		var slope_vec := get_gravity().slide(floor_normal)
 		var slope_dir := slope_vec.normalized()
 		if slope_dir.is_zero_approx():
 			slope_dir = Vector3.FORWARD
-		downhill_speed += slope_vec.length() * slope_gravity_scale * delta
-		downhill_speed *= maxf(0.0, 1.0 - ice_friction * delta)
-		downhill_speed = clampf(downhill_speed, 0.0, effective_max)
+		var mult := _effective_speed_mult()
+		var effective_friction := ice_friction / maxf(1.0, mult * 0.6)
+		downhill_speed += slope_vec.length() * slope_gravity_scale * mult * delta
+		downhill_speed *= maxf(0.0, 1.0 - effective_friction * delta)
+		downhill_speed = clampf(downhill_speed, 0.0, safety_speed_ceiling)
 		velocity = slope_dir * downhill_speed + Vector3.RIGHT * lateral_speed - floor_normal * 0.25
 	else:
 		velocity += get_gravity() * delta
@@ -139,6 +148,11 @@ func _physics_process(delta: float) -> void:
 		cam.look_at(global_position + camera_look_ahead, Vector3.UP)
 
 
+func get_current_steer_speed() -> float:
+	var speed_ratio := clampf(downhill_speed / maxf(1.0, max_downhill_speed), 1.0, 3.5)
+	return steer_speed * (1.0 + (speed_ratio - 1.0) * 0.35)
+
+
 func _effective_speed_mult() -> float:
 	return boost_multiplier * speed_multiplier
 
@@ -149,8 +163,7 @@ func launch_from_ramp(upward_speed: float = 8.5, forward_boost: float = 4.5) -> 
 	airborne_grace_timer = 0.25
 	floor_snap_length = 0.0
 	was_on_floor = false
-	var effective_max := max_downhill_speed * _effective_speed_mult()
-	downhill_speed = minf(effective_max, downhill_speed + forward_boost)
+	downhill_speed = minf(safety_speed_ceiling, downhill_speed + forward_boost)
 	var slope_pitch := deg_to_rad(-16.0)
 	var forward_dir := Vector3(0.0, sin(slope_pitch), -cos(slope_pitch)).normalized()
 	velocity = forward_dir * downhill_speed + Vector3(lateral_speed, upward_speed, 0.0)
@@ -162,8 +175,7 @@ func trigger_boost_pad(mult: float = 1.35, duration: float = 1.6, instant_add: f
 	boost_timer = maxf(boost_timer, duration)
 	boost_multiplier = maxf(boost_multiplier, mult)
 	target_fov_bonus = maxf(target_fov_bonus, fov_kick)
-	var effective_max := max_downhill_speed * _effective_speed_mult()
-	downhill_speed = minf(effective_max, downhill_speed + instant_add)
+	downhill_speed = minf(safety_speed_ceiling, downhill_speed + instant_add)
 	boost_activated.emit(duration)
 
 
@@ -171,24 +183,25 @@ func apply_powerup(data: PowerUpData) -> void:
 	if data == null or not is_active or is_crashed:
 		return
 	if data.id == &"shield":
-		has_shield = true
-		powerup_changed.emit(&"shield", true, 0.0)
+		shield_count += 1
+		powerup_changed.emit(&"shield", shield_count > 0, float(shield_count))
 	else:
-		speed_multiplier = data.speed_multiplier
-		_powerup_timer = data.duration
+		boost_stacks += 1
+		speed_multiplier = pow(boost_stack_base, float(boost_stacks))
+		_powerup_timer = maxf(_powerup_timer, data.duration)
 		_active_powerup_id = data.id
-		var effective_max := max_downhill_speed * _effective_speed_mult()
-		downhill_speed = minf(effective_max, downhill_speed + 7.0)
-		target_fov_bonus = maxf(target_fov_bonus, 10.0)
-		powerup_changed.emit(data.id, true, data.duration)
+		downhill_speed = minf(safety_speed_ceiling, downhill_speed + 7.0 * speed_multiplier)
+		target_fov_bonus = maxf(target_fov_bonus, minf(24.0, 8.0 + 4.0 * float(boost_stacks)))
+		powerup_changed.emit(data.id, true, _powerup_timer)
 
 
 func on_obstacle_hit(obstacle: Node3D) -> void:
 	if not is_active or is_crashed:
 		return
-	if has_shield:
-		has_shield = false
-		powerup_changed.emit(&"shield", false, 0.0)
+	if shield_count > 0:
+		shield_count -= 1
+		shields_consumed += 1
+		powerup_changed.emit(&"shield", shield_count > 0, float(shield_count))
 		if obstacle and obstacle.has_method("shatter"):
 			obstacle.shatter()
 		return
@@ -220,7 +233,9 @@ func reset_to_start(start_transform: Transform3D) -> void:
 	boost_timer = 0.0
 	boost_multiplier = 1.0
 	target_fov_bonus = 0.0
-	has_shield = false
+	shield_count = 0
+	shields_consumed = 0
+	boost_stacks = 0
 	speed_multiplier = 1.0
 	_powerup_timer = 0.0
 	_active_powerup_id = &""

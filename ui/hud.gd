@@ -12,8 +12,10 @@ signal restart_requested()
 var _last_displayed_score: int = -1
 var _last_displayed_bonus: int = -1
 var _status_timer: float = 0.0
-var _shield_active: bool = false
+var _shield_count: int = 0
+var _shields_consumed: int = 0
 var _boost_active: bool = false
+var _boost_stacks: int = 0
 var _boost_remaining: float = 0.0
 
 
@@ -37,6 +39,7 @@ func _process(delta: float) -> void:
 		_boost_remaining = maxf(0.0, _boost_remaining - delta)
 		if _boost_remaining <= 0.0:
 			_boost_active = false
+			_boost_stacks = 0
 		_refresh_powerup_label()
 
 
@@ -58,18 +61,28 @@ func show_status(text: String, duration: float = 1.5) -> void:
 	_status_timer = duration
 
 
-func set_powerup_status(id: StringName, active: bool, remaining: float) -> void:
-	if id == &"shield":
-		_shield_active = active
-	elif id == &"boost":
-		_boost_active = active
+func set_powerup_status(
+	id: StringName,
+	active: bool,
+	remaining: float,
+	shield_count: int = 0,
+	shields_consumed: int = 0,
+	boost_stacks: int = 0
+) -> void:
+	_shield_count = shield_count
+	_shields_consumed = shields_consumed
+	if id == &"boost":
+		_boost_active = active and boost_stacks > 0
+		_boost_stacks = boost_stacks if active else 0
 		_boost_remaining = remaining if active else 0.0
 	_refresh_powerup_label()
 
 
 func reset_powerups() -> void:
-	_shield_active = false
+	_shield_count = 0
+	_shields_consumed = 0
 	_boost_active = false
+	_boost_stacks = 0
 	_boost_remaining = 0.0
 	_refresh_powerup_label()
 
@@ -78,16 +91,22 @@ func _refresh_powerup_label() -> void:
 	if not powerup_label:
 		return
 	var parts: Array[String] = []
-	if _shield_active:
-		parts.append("SHIELD: ACTIVE")
-	if _boost_active:
-		parts.append("BOOST: %.1fs" % _boost_remaining)
+	if _shield_count > 0 or _shields_consumed > 0:
+		parts.append("SHIELDS: x%d" % _shield_count)
+		parts.append("USED: %d" % _shields_consumed)
+	if _boost_active and _boost_stacks > 0:
+		parts.append("BOOST x%d: %.1fs" % [_boost_stacks, _boost_remaining])
 	powerup_label.text = "  |  ".join(parts)
 
 
-func show_game_over(final_score: int, distance_m: int, bonus: int) -> void:
+func show_game_over(final_score: int, distance_m: int, bonus: int, shields_used: int = 0) -> void:
 	if final_score_label:
-		final_score_label.text = "Score: %d (%dm + %d bonus)" % [final_score, distance_m, bonus]
+		final_score_label.text = "Score: %d (%dm + %d bonus | Shields Used: %d)" % [
+			final_score,
+			distance_m,
+			bonus,
+			shields_used,
+		]
 	if game_over_panel:
 		game_over_panel.visible = true
 	if restart_button:
