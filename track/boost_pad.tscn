@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://fehrrtus2oae"]
+
+[ext_resource type="Script" path="res://track/boost_pad.gd" id="1_3073u"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6s2bx"]
+size = Vector3(2.6, 0.8, 4.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4t6xx"]
+albedo_color = Color(0, 0.8980392, 1, 1)
+metallic = 0.3
+roughness = 0.1
+
+[node name="BoostPad" type="Area3D" unique_id=1381189350]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_3073u")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=905395604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("BoxShape3D_6s2bx")
+
+[node name="PadVisual" type="CSGBox3D" parent="." unique_id=608235270]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+material_override = SubResource("StandardMaterial3D_4t6xx")
+size = Vector3(2.4, 0.08, 4.5)

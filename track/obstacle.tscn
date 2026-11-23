@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://bub2xkql7eu0q"]
+
+[ext_resource type="Script" path="res://track/obstacle.gd" id="1_q0emi"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mnri3"]
+size = Vector3(2, 1.6, 1.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kuxul"]
+albedo_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
+roughness = 0.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7ngbc"]
+size = Vector3(4.8, 2.4, 2)
+
+[node name="Obstacle" type="Area3D" unique_id=1237962204]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_q0emi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1400667792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_mnri3")
+
+[node name="Visual" type="CSGBox3D" parent="." unique_id=1649112756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = SubResource("StandardMaterial3D_kuxul")
+size = Vector3(2, 1.6, 1.2)
+
+[node name="NearMissZone" type="Area3D" parent="." unique_id=1102957085]
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NearMissZone" unique_id=625388238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_7ngbc")

@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://bhs00qyxlm8y"]
+
+[ext_resource type="Script" path="res://track/ramp.gd" id="1_1info"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nesjr"]
+size = Vector3(2.8, 1.4, 3.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ylcw5"]
+albedo_color = Color(0.9529412, 0.6117647, 0.07058824, 1)
+metallic = 0.15
+roughness = 0.25
+
+[node name="Ramp" type="Area3D" unique_id=811826500]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_1info")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=734631625]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_nesjr")
+
+[node name="RampWedge" type="CSGBox3D" parent="." unique_id=1210980323]
+transform = Transform3D(1, 0, 0, 0, 0.95105654, -0.309017, 0, 0.309017, 0.95105654, 0, 0.35, 0)
+material_override = SubResource("StandardMaterial3D_ylcw5")
+size = Vector3(2.8, 0.5, 3.6)
