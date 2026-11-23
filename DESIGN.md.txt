@@ -14,3 +14,16 @@
 ## Rules for AI
 - Keep scripts minimal and focused on feel/physics.
 - Do not add menus, score systems, or procedural chunk spawning until Phase 1 is approved.
+
+
+## Phase 4: Biomes, Dynamic Transitions & Visual Polish
+- **3 `BiomeData` Presets (`res://data/*.tres`)**:
+  - `alpine_ice.tres`: Crisp icy blue track (`#a8d8f0`), slate rails (`#5c7080`), crimson obstacles (`#c0392b`), `ice_friction = 0.12`, `slope_angle_deg = -16.0`, cool alpine sky (`#3b6998` top / `#a8cce0` horizon).
+  - `autumn_canyon.tres`: Warm amber/terracotta track (`#d37543`), deep canyon rails (`#6e2c1b`), dark rock obstacles (`#4a2311`), `ice_friction = 0.18`, `slope_angle_deg = -18.0`, warm sunset sky (`#8e3b2e` top / `#f39c42` horizon).
+  - `midnight_glacier.tres`: Dark obsidian track (`#1c2430`), glowing cyan rails (`#00e5ff`), magenta neon hazards (`#ff2a6d`), `ice_friction = 0.06`, `slope_angle_deg = -16.0`, deep night sky (`#090e1a` top / `#182b49` horizon).
+- **Dynamic Distance-Based Biome Transitions**:
+  - `Main` cycles automatically through `[alpine_ice, autumn_canyon, midnight_glacier]` every `1500m` of distance (`biome_cycle_distance = 1500.0`).
+  - Transitions update `TrackSpawner` (`set_biome()`), `Player.ice_friction`, active chunk materials and slope angles, smoothly lerp `WorldEnvironment` procedural sky colors, and flash an `"ENTERING: <BIOME NAME>"` HUD banner.
+- **Visual Polish & Web Export Readiness**:
+  - Stylized low-poly sled (`MeshInstance3D` deck, tapered `PrismMesh` nose, twin metallic runners, rider + helmet) and faceted 6-sided low-poly spire obstacles (`CylinderMesh` tiered spire).
+  - Configured `gl_compatibility` renderer (`rendering/renderer/rendering_method` and `rendering_method.mobile`) for clean Web / itch.io export.

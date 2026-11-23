@@ -93,7 +93,6 @@ func _populate_ramp_barrier(difficulty: float, rng: RandomNumberGenerator) -> vo
 		var obs := _spawn_item(OBSTACLE_SCENE, Vector3(barrier_x, 0.0, -46.0))
 		_apply_obstacle_material(obs)
 
-	# Open bypass lane pickup
 	_spawn_pickup(Vector3(4.5, 0.0, -46.0), rng)
 
 	var lanes: Array[int] = [0, 1, 2, 3]
@@ -127,6 +126,9 @@ func _apply_obstacle_material(obs: Node3D) -> void:
 	var visual := obs.get_node_or_null("Visual") as GeometryInstance3D
 	if visual:
 		visual.material_override = _obstacle_material
+		for child in visual.get_children():
+			if child is GeometryInstance3D:
+				(child as GeometryInstance3D).material_override = _obstacle_material
 
 
 func _shuffle_ints(arr: Array[int], rng: RandomNumberGenerator) -> void:
@@ -149,6 +151,10 @@ func configure_for_biome(biome: BiomeData) -> void:
 			left_rail.material_override = biome.rail_material
 		if right_rail:
 			right_rail.material_override = biome.rail_material
+	if spawned_container:
+		for child in spawned_container.get_children():
+			if child.has_method("shatter"):
+				_apply_obstacle_material(child as Node3D)
 
 
 func get_ice_friction() -> float:

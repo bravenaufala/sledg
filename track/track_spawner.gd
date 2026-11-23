@@ -21,6 +21,27 @@ func _ready() -> void:
 		chunk_variants = [DEFAULT_STANDARD_CHUNK, DEFAULT_RAMP_CHUNK]
 
 
+func set_biome(biome: BiomeData, apply_to_active: bool = true) -> void:
+	current_biome = biome
+	if biome != null:
+		slope_angle_deg = biome.slope_angle_deg
+	if not apply_to_active or biome == null or active_chunks.is_empty():
+		return
+	var pitch := deg_to_rad(slope_angle_deg)
+	for i in active_chunks.size():
+		var chunk: Node3D = active_chunks[i]
+		if not is_instance_valid(chunk):
+			continue
+		if i == 0:
+			chunk.global_transform = Transform3D(Basis(Vector3.RIGHT, pitch), chunk.global_position)
+		else:
+			var prev_exit := active_chunks[i - 1].get_node_or_null("ExitMarker") as Marker3D
+			if prev_exit:
+				chunk.global_transform = prev_exit.global_transform
+		if chunk.has_method("configure_for_biome"):
+			chunk.configure_for_biome(biome)
+
+
 func reset_track() -> void:
 	for chunk in active_chunks:
 		if is_instance_valid(chunk):
@@ -40,7 +61,7 @@ func update_spawner(player_pos: Vector3, distance_traveled: float) -> void:
 		return
 	var difficulty := clampf(distance_traveled / 1200.0, 0.15, 1.0)
 	while active_chunks.size() > 0:
-		var front := active_chunks[0]
+		var front: Node3D = active_chunks[0]
 		var exit_marker := front.get_node_or_null("ExitMarker") as Marker3D
 		if exit_marker == null:
 			break
@@ -56,13 +77,13 @@ func _spawn_next_chunk(difficulty: float) -> void:
 	var chunk := scene.instantiate() as Node3D
 	add_child(chunk)
 
+	var pitch := deg_to_rad(current_biome.slope_angle_deg if current_biome else slope_angle_deg)
 	if active_chunks.is_empty():
-		var pitch := deg_to_rad(current_biome.slope_angle_deg if current_biome else slope_angle_deg)
 		chunk.global_transform = Transform3D(Basis(Vector3.RIGHT, pitch), Vector3.ZERO)
 	else:
 		var tail: Node3D = active_chunks.back()
 		var exit_marker := tail.get_node("ExitMarker") as Marker3D
-		chunk.global_transform = exit_marker.global_transform
+		chunk.global_transform = Transform3D(Basis(Vector3.RIGHT, pitch), exit_marker.global_position)
 
 	if current_biome and chunk.has_method("configure_for_biome"):
 		chunk.configure_for_biome(current_biome)

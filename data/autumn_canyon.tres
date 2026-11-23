@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="BiomeData" format=3 uid="uid://ctbfvhn6rqijt"]
+
+[ext_resource type="Script" uid="uid://5g5rwxpba5b5" path="res://data/biome_data.gd" id="1_usswk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2eyd1"]
+albedo_color = Color(0.2901961, 0.13725491, 0.06666667, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iiex5"]
+albedo_color = Color(0.43137255, 0.17254902, 0.105882354, 1)
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iuide"]
+albedo_color = Color(0.827451, 0.45882353, 0.2627451, 1)
+metallic = 0.08
+roughness = 0.25
+
+[resource]
+script = ExtResource("1_usswk")
+biome_id = &"autumn_canyon"
+display_name = "AUTUMN CANYON"
+track_material = SubResource("StandardMaterial3D_iuide")
+rail_material = SubResource("StandardMaterial3D_iiex5")
+obstacle_material = SubResource("StandardMaterial3D_2eyd1")
+sky_top_color = Color(0.5568628, 0.23137255, 0.18039216, 1)
+sky_horizon_color = Color(0.9529412, 0.6117647, 0.25882354, 1)
+ice_friction = 0.18
+slope_angle_deg = -18.0
