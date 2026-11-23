@@ -1,0 +1,16 @@
+# Icy Downhill Slider — MVP Design
+
+## Engine & Tech
+- Godot 4.x (GDScript only)
+- 3D third-person downhill endless slider
+
+## Phase 1: Greybox Scope (Current Goal)
+- 1 scene (`main.tscn`) with a long, sloped icy track (low friction).
+- Player: Simple capsule/box sled that slides down automatically with gravity.
+- Controls: A/D or Left/Right arrows to steer smoothly with slight banking/tilt.
+- Camera: Third-person follow camera positioned behind and slightly above the player.
+- Visuals: Plain grey/blue CSG shapes or primitives only. No art, audio, or UI yet.
+
+## Rules for AI
+- Keep scripts minimal and focused on feel/physics.
+- Do not add menus, score systems, or procedural chunk spawning until Phase 1 is approved.

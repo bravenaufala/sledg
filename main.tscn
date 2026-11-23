@@ -1,0 +1,122 @@
+[gd_scene format=3 uid="uid://cm5ugbvqphb7p"]
+
+[ext_resource type="Script" uid="uid://c5thk5dlb58rl" path="res://player.gd" id="1_ig7tw"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
+sky_top_color = Color(0.38, 0.45, 0.55, 1)
+sky_horizon_color = Color(0.65, 0.67, 0.7, 1)
+ground_bottom_color = Color(0.2, 0.17, 0.13, 1)
+ground_horizon_color = Color(0.65, 0.67, 0.7, 1)
+
+[sub_resource type="Sky" id="Sky_h2yge"]
+sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
+
+[sub_resource type="Environment" id="Environment_1bvp3"]
+background_mode = 2
+sky = SubResource("Sky_h2yge")
+ambient_light_source = 3
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_lquwl"]
+friction = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7mycd"]
+albedo_color = Color(0.65882355, 0.84705883, 0.9411765, 1)
+metallic = 0.1
+roughness = 0.15
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_272bh"]
+albedo_color = Color(0.42352942, 0.47843137, 0.5372549, 1)
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5vw27"]
+albedo_color = Color(0.42352942, 0.47843137, 0.5372549, 1)
+roughness = 0.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kek77"]
+size = Vector3(14, 1, 400)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4c57u"]
+size = Vector3(1, 2, 400)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_efxa6"]
+size = Vector3(1, 2, 400)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dg77c"]
+radius = 0.45
+height = 1.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ycdy4"]
+albedo_color = Color(0.2901961, 0.43529412, 0.64705884, 1)
+metallic = 0.2
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w48qg"]
+albedo_color = Color(0.8156863, 0.8627451, 0.9098039, 1)
+roughness = 0.5
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vivmo"]
+radius = 0.25
+height = 0.7
+
+[node name="Main" type="Node3D" unique_id=466642103]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=166899286]
+environment = SubResource("Environment_1bvp3")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1438170271]
+transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Track" type="StaticBody3D" parent="." unique_id=621368419]
+transform = Transform3D(1, 0, 0, 0, 0.9612617, 0.27563736, 0, -0.27563736, 0.9612617, 0, 0, 0)
+physics_material_override = SubResource("PhysicsMaterial_lquwl")
+
+[node name="TrackBed" type="CSGBox3D" parent="Track" unique_id=376182380]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -180)
+material_override = SubResource("StandardMaterial3D_7mycd")
+size = Vector3(14, 1, 400)
+
+[node name="LeftRail" type="CSGBox3D" parent="Track" unique_id=472786713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.1, -180)
+material_override = SubResource("StandardMaterial3D_272bh")
+size = Vector3(1, 1.2, 400)
+
+[node name="RightRail" type="CSGBox3D" parent="Track" unique_id=1588987054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0.1, -180)
+material_override = SubResource("StandardMaterial3D_5vw27")
+size = Vector3(1, 1.2, 400)
+
+[node name="TrackFloorCollision" type="CollisionShape3D" parent="Track" unique_id=1912324535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -180)
+shape = SubResource("BoxShape3D_kek77")
+
+[node name="LeftWallCollision" type="CollisionShape3D" parent="Track" unique_id=608491018]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.5, -180)
+shape = SubResource("BoxShape3D_4c57u")
+
+[node name="RightWallCollision" type="CollisionShape3D" parent="Track" unique_id=274365578]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0.5, -180)
+shape = SubResource("BoxShape3D_efxa6")
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1964644412]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+script = ExtResource("1_ig7tw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1573198005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
+shape = SubResource("CapsuleShape3D_dg77c")
+
+[node name="SledVisual" type="Node3D" parent="Player" unique_id=1690978550]
+
+[node name="SledBody" type="CSGBox3D" parent="Player/SledVisual" unique_id=185414665]
+material_override = SubResource("StandardMaterial3D_ycdy4")
+size = Vector3(1, 0.45, 1.8)
+
+[node name="RiderCapsule" type="MeshInstance3D" parent="Player/SledVisual" unique_id=1548569532]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.1)
+material_override = SubResource("StandardMaterial3D_w48qg")
+mesh = SubResource("CapsuleMesh_vivmo")
+
+[node name="Camera3D" type="Camera3D" parent="Player" unique_id=555759631]
+transform = Transform3D(1, 0, 0, 0, 0.9360728, 0.35180622, 0, -0.35180622, 0.9360728, 0, 4.2, 6.5)
+current = true
