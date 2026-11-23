@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PowerUpData" format=3 uid="uid://dja2cndl2qync"]
+
+[ext_resource type="Script" uid="uid://bps45guh0yuw6" path="res://data/powerup_data.gd" id="1_xwa0m"]
+
+[resource]
+script = ExtResource("1_xwa0m")
+id = &"boost"
+speed_multiplier = 1.35
+accent_color = Color(1, 0.91764706, 0, 1)

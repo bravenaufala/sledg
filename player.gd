@@ -37,6 +37,7 @@ var _active_powerup_id: StringName = &""
 
 @onready var visual: Node3D = $SledVisual
 @onready var cam: Camera3D = $Camera3D
+@onready var snow_spray: GPUParticles3D = $SledVisual/SnowSpray
 
 
 func _ready() -> void:
@@ -57,6 +58,8 @@ func _physics_process(delta: float) -> void:
 		cam.fov = lerpf(cam.fov, base_fov + target_fov_bonus, fov_t)
 
 	if not is_active:
+		if snow_spray:
+			snow_spray.emitting = false
 		if cam:
 			var cam_t := 1.0 - exp(-camera_follow_speed * delta)
 			cam.global_position = cam.global_position.lerp(global_position + camera_offset, cam_t)
@@ -70,12 +73,15 @@ func _physics_process(delta: float) -> void:
 		boost_timer = maxf(0.0, boost_timer - delta)
 		if boost_timer <= 0.0:
 			boost_multiplier = 1.0
-			target_fov_bonus = 0.0
+			if _powerup_timer <= 0.0:
+				target_fov_bonus = 0.0
 
 	if _powerup_timer > 0.0:
 		_powerup_timer = maxf(0.0, _powerup_timer - delta)
 		if _powerup_timer <= 0.0:
 			speed_multiplier = 1.0
+			if boost_timer <= 0.0:
+				target_fov_bonus = 0.0
 			var expired_id := _active_powerup_id
 			_active_powerup_id = &""
 			if not expired_id.is_empty():
@@ -110,6 +116,9 @@ func _physics_process(delta: float) -> void:
 	was_on_floor = grounded
 	move_and_slide()
 	lateral_speed = velocity.x
+
+	if snow_spray:
+		snow_spray.emitting = is_active and not is_crashed and grounded and downhill_speed > 2.0
 
 	if visual:
 		var t := 1.0 - exp(-bank_lerp_speed * delta)
@@ -163,11 +172,14 @@ func apply_powerup(data: PowerUpData) -> void:
 		return
 	if data.id == &"shield":
 		has_shield = true
-		powerup_changed.emit(&"shield", true, data.duration)
+		powerup_changed.emit(&"shield", true, 0.0)
 	else:
 		speed_multiplier = data.speed_multiplier
 		_powerup_timer = data.duration
 		_active_powerup_id = data.id
+		var effective_max := max_downhill_speed * _effective_speed_mult()
+		downhill_speed = minf(effective_max, downhill_speed + 7.0)
+		target_fov_bonus = maxf(target_fov_bonus, 10.0)
 		powerup_changed.emit(data.id, true, data.duration)
 
 
@@ -186,6 +198,8 @@ func on_obstacle_hit(obstacle: Node3D) -> void:
 	downhill_speed = 0.0
 	lateral_speed = 0.0
 	target_fov_bonus = 0.0
+	if snow_spray:
+		snow_spray.emitting = false
 	crashed.emit()
 
 
@@ -211,6 +225,8 @@ func reset_to_start(start_transform: Transform3D) -> void:
 	_powerup_timer = 0.0
 	_active_powerup_id = &""
 	floor_snap_length = 0.15
+	if snow_spray:
+		snow_spray.emitting = false
 	if visual:
 		visual.rotation = Vector3.ZERO
 	if cam:

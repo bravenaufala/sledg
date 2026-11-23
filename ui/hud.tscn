@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cmmvwpmmiv4ew"]
 
-[ext_resource type="Script" path="res://ui/hud.gd" id="1_rbyyf"]
+[ext_resource type="Script" uid="uid://3rqdwg8ott3j" path="res://ui/hud.gd" id="1_rbyyf"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1678660146]
 script = ExtResource("1_rbyyf")
@@ -53,3 +53,10 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(260, 48)
 layout_mode = 2
 text = "Slide Again [Space / Enter]"
+
+[node name="PowerUpLabel" type="Label" parent="." unique_id=1435661647]
+offset_left = 24.0
+offset_top = 60.0
+offset_right = 25.0
+offset_bottom = 96.0
+theme_override_font_sizes/font_size = 22

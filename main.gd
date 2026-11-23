@@ -20,6 +20,7 @@ func _ready() -> void:
 		player.crashed.connect(_on_player_crashed)
 		player.near_miss_scored.connect(_on_near_miss_scored)
 		player.boost_activated.connect(_on_boost_activated)
+		player.powerup_changed.connect(_on_player_powerup_changed)
 	if hud:
 		hud.restart_requested.connect(start_new_run)
 	start_new_run()
@@ -59,6 +60,15 @@ func _on_boost_activated(_duration: float) -> void:
 		hud.show_status("SPEED BOOST!", 1.2)
 
 
+func _on_player_powerup_changed(id: StringName, active: bool, remaining: float) -> void:
+	if hud:
+		hud.set_powerup_status(id, active, remaining)
+		if active:
+			hud.show_status("SHIELD READY!" if id == &"shield" else "BOOST POWER-UP!", 1.3)
+		elif id == &"shield" and run_state == RunState.RUNNING:
+			hud.show_status("SHIELD BLOCKED HIT!", 1.3)
+
+
 func _on_player_crashed() -> void:
 	run_state = RunState.GAME_OVER
 	score = int(total_distance) + bonus_points
@@ -77,5 +87,6 @@ func start_new_run() -> void:
 		player.reset_to_start(Transform3D(Basis.IDENTITY, SPAWN_POS))
 	if hud:
 		hud.hide_game_over()
+		hud.reset_powerups()
 		hud.show_status("", 0.0)
 		hud.update_score(0, 0, 0)

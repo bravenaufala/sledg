@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PowerUpData" format=3 uid="uid://leaqw46m01cp"]
+
+[ext_resource type="Script" uid="uid://bps45guh0yuw6" path="res://data/powerup_data.gd" id="1_wuvl1"]
+
+[resource]
+script = ExtResource("1_wuvl1")
+duration = 0.0
+accent_color = Color(0, 0.8980392, 1, 1)

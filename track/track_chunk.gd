@@ -3,13 +3,16 @@ extends StaticBody3D
 const OBSTACLE_SCENE := preload("res://track/obstacle.tscn")
 const RAMP_SCENE := preload("res://track/ramp.tscn")
 const BOOST_SCENE := preload("res://track/boost_pad.tscn")
+const PICKUP_SCENE := preload("res://track/pickup.tscn")
+const SHIELD_POWERUP := preload("res://data/shield_powerup.tres")
+const BOOST_POWERUP := preload("res://data/boost_powerup.tres")
 
 const LANE_X: Array[float] = [-4.5, -1.5, 1.5, 4.5]
 const ROW_Z: Array[float] = [-22.0, -48.0, -70.0]
 
 @export var chunk_variant: StringName = &"standard"
 @export var chunk_length: float = 80.0
-@export var pickup_spawn_chance: float = 0.0
+@export var pickup_spawn_chance: float = 0.55
 
 var _ice_friction: float = 0.12
 var _obstacle_material: Material = null
@@ -60,13 +63,23 @@ func _populate_standard(difficulty: float, rng: RandomNumberGenerator) -> void:
 			var obs := _spawn_item(OBSTACLE_SCENE, Vector3(lane_x, 0.0, z_pos))
 			_apply_obstacle_material(obs)
 
+		var placed_feature_in_first_open := false
+		var open_lane_x := LANE_X[lanes[obstacle_count]]
 		if row_idx < 2:
-			var open_lane_x := LANE_X[lanes[obstacle_count]]
 			var roll := rng.randf()
 			if roll < 0.35:
 				_spawn_item(BOOST_SCENE, Vector3(open_lane_x, 0.0, z_pos))
+				placed_feature_in_first_open = true
 			elif roll < 0.60:
 				_spawn_item(RAMP_SCENE, Vector3(open_lane_x, 0.0, z_pos))
+				placed_feature_in_first_open = true
+
+		if not placed_feature_in_first_open:
+			if rng.randf() < pickup_spawn_chance:
+				_spawn_pickup(Vector3(open_lane_x, 0.0, z_pos), rng)
+		elif obstacle_count + 1 < lanes.size() and rng.randf() < pickup_spawn_chance:
+			var extra_lane_x := LANE_X[lanes[obstacle_count + 1]]
+			_spawn_pickup(Vector3(extra_lane_x, 0.0, z_pos), rng)
 
 
 func _populate_ramp_barrier(difficulty: float, rng: RandomNumberGenerator) -> void:
@@ -79,6 +92,9 @@ func _populate_ramp_barrier(difficulty: float, rng: RandomNumberGenerator) -> vo
 	for barrier_x in [-4.5, -1.5, 1.5]:
 		var obs := _spawn_item(OBSTACLE_SCENE, Vector3(barrier_x, 0.0, -46.0))
 		_apply_obstacle_material(obs)
+
+	# Open bypass lane pickup
+	_spawn_pickup(Vector3(4.5, 0.0, -46.0), rng)
 
 	var lanes: Array[int] = [0, 1, 2, 3]
 	_shuffle_ints(lanes, rng)
@@ -93,6 +109,16 @@ func _spawn_item(scene: PackedScene, local_pos: Vector3) -> Node3D:
 	spawned_container.add_child(item)
 	item.position = local_pos
 	return item
+
+
+func _spawn_pickup(local_pos: Vector3, rng: RandomNumberGenerator) -> Node3D:
+	var pickup := PICKUP_SCENE.instantiate() as Node3D
+	spawned_container.add_child(pickup)
+	pickup.position = local_pos
+	var data: PowerUpData = SHIELD_POWERUP if rng.randf() < 0.5 else BOOST_POWERUP
+	if pickup.has_method("configure_powerup"):
+		pickup.configure_powerup(data)
+	return pickup
 
 
 func _apply_obstacle_material(obs: Node3D) -> void:
