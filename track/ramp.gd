@@ -1,7 +1,8 @@
 extends Area3D
 
-@export var launch_upward_speed: float = 8.5
+@export var base_launch_speed: float = 3.5
 @export var launch_forward_boost: float = 4.5
+@export var ramp_angle_deg: float = 29.0
 
 var _triggered: bool = false
 
@@ -15,4 +16,4 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	if body.has_method("launch_from_ramp"):
 		_triggered = true
-		body.launch_from_ramp(launch_upward_speed, launch_forward_boost)
+		body.launch_from_ramp(base_launch_speed, launch_forward_boost, ramp_angle_deg)

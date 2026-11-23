@@ -157,7 +157,7 @@ func _effective_speed_mult() -> float:
 	return boost_multiplier * speed_multiplier
 
 
-func launch_from_ramp(upward_speed: float = 8.5, forward_boost: float = 4.5) -> void:
+func launch_from_ramp(base_launch_speed: float = 3.5, forward_boost: float = 4.5, ramp_angle_deg: float = 29.0) -> void:
 	if not is_active or is_crashed:
 		return
 	airborne_grace_timer = 0.25
@@ -166,7 +166,9 @@ func launch_from_ramp(upward_speed: float = 8.5, forward_boost: float = 4.5) -> 
 	downhill_speed = minf(safety_speed_ceiling, downhill_speed + forward_boost)
 	var slope_pitch := deg_to_rad(-16.0)
 	var forward_dir := Vector3(0.0, sin(slope_pitch), -cos(slope_pitch)).normalized()
-	velocity = forward_dir * downhill_speed + Vector3(lateral_speed, upward_speed, 0.0)
+	var ramp_tan := tan(deg_to_rad(ramp_angle_deg))
+	var lift_speed := clampf(base_launch_speed + downhill_speed * ramp_tan, 9.5, 68.0)
+	velocity = forward_dir * downhill_speed + Vector3(lateral_speed, lift_speed, 0.0)
 
 
 func trigger_boost_pad(mult: float = 1.35, duration: float = 1.6, instant_add: float = 8.0, fov_kick: float = 12.0) -> void:
