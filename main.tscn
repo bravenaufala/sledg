@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://c5thk5dlb58rl" path="res://player.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://cm8blm46gonv3" path="res://track/track_spawner.gd" id="3_lquwl"]
 [ext_resource type="PackedScene" uid="uid://cmmvwpmmiv4ew" path="res://ui/hud.tscn" id="4_7mycd"]
+[ext_resource type="Script" path="res://audio/audio_manager.gd" id="5_lquwl"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 sky_top_color = Color(0.38, 0.45, 0.55, 1)
@@ -167,3 +168,6 @@ fov = 70.0
 script = ExtResource("3_lquwl")
 
 [node name="HUD" parent="." unique_id=1678660146 instance=ExtResource("4_7mycd")]
+
+[node name="AudioManager" type="Node" parent="." unique_id=310538485]
+script = ExtResource("5_lquwl")

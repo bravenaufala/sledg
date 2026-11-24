@@ -4,6 +4,8 @@ signal crashed()
 signal near_miss_scored(points: int)
 signal boost_activated(duration: float)
 signal powerup_changed(id: StringName, active: bool, remaining: float)
+signal ramp_launched()
+signal landed(impact: float)
 
 const BASE_SPRAY_VEL_MIN := 2.5
 const BASE_SPRAY_VEL_MAX := 5.5
@@ -54,6 +56,7 @@ var _camera_dip_offset: float = 0.0
 var _camera_dip_velocity: float = 0.0
 var _air_time: float = 0.0
 var _prev_vertical_velocity: float = 0.0
+var current_carve_ratio: float = 0.0
 var current_spray_color: Color = Color(0.82, 0.96, 1.0, 1.0)
 var _spray_mat: ParticleProcessMaterial = null
 
@@ -150,6 +153,7 @@ func _physics_process(delta: float) -> void:
 			if _air_time > 0.12:
 				var impact := clampf(absf(_prev_vertical_velocity) / 16.0, 0.35, 1.35)
 				_camera_dip_velocity -= landing_dip_strength * impact * 7.5
+				landed.emit(impact)
 			_air_time = 0.0
 		var floor_normal := get_floor_normal()
 		var slope_vec := get_gravity().slide(floor_normal)
@@ -173,6 +177,7 @@ func _physics_process(delta: float) -> void:
 	lateral_speed = velocity.x
 
 	var carve_ratio := clampf(lateral_speed / maxf(1.0, current_steer_speed), -1.0, 1.0)
+	current_carve_ratio = carve_ratio
 
 	if snow_spray:
 		var spraying := is_active and not is_crashed and grounded and downhill_speed > 2.0
@@ -239,6 +244,7 @@ func launch_from_ramp(base_launch_speed: float = 3.5, forward_boost: float = 4.5
 	var ramp_tan := tan(deg_to_rad(ramp_angle_deg))
 	var lift_speed := clampf(base_launch_speed + downhill_speed * ramp_tan, 9.5, 68.0)
 	velocity = forward_dir * downhill_speed + Vector3(lateral_speed, lift_speed, 0.0)
+	ramp_launched.emit()
 
 
 func trigger_boost_pad(mult: float = 1.35, duration: float = 1.6, instant_add: float = 8.0, _fov_kick: float = 12.0) -> void:
@@ -280,6 +286,7 @@ func on_obstacle_hit(obstacle: Node3D) -> void:
 	velocity = Vector3.ZERO
 	downhill_speed = 0.0
 	lateral_speed = 0.0
+	current_carve_ratio = 0.0
 	if snow_spray:
 		snow_spray.emitting = false
 	crashed.emit()
@@ -296,6 +303,7 @@ func reset_to_start(start_transform: Transform3D) -> void:
 	is_active = true
 	downhill_speed = 0.0
 	lateral_speed = 0.0
+	current_carve_ratio = 0.0
 	velocity = Vector3.ZERO
 	airborne_grace_timer = 0.0
 	was_on_floor = false

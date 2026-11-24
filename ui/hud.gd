@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal restart_requested()
+signal mute_toggled()
 
 @onready var score_label: Label = $ScoreLabel
 @onready var powerup_label: Label = $PowerUpLabel
@@ -9,6 +10,7 @@ signal restart_requested()
 @onready var final_score_label: Label = $GameOverPanel/VBox/FinalScoreLabel
 @onready var restart_button: Button = $GameOverPanel/VBox/RestartButton
 @onready var speed_lines: Control = $SpeedLinesOverlay
+@onready var mute_button: Button = get_node_or_null("MuteButton") as Button
 
 var _last_displayed_score: int = -1
 var _last_displayed_bonus: int = -1
@@ -23,6 +25,9 @@ var _boost_remaining: float = 0.0
 func _ready() -> void:
 	if restart_button:
 		restart_button.pressed.connect(_on_restart_pressed)
+	if mute_button:
+		mute_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_KEEP_SIZE, 20)
+		mute_button.pressed.connect(_on_mute_pressed)
 	if game_over_panel:
 		game_over_panel.visible = false
 	if status_label:
@@ -131,6 +136,15 @@ func show_game_over(final_score: int, distance_m: int, bonus: int, shields_used:
 func hide_game_over() -> void:
 	if game_over_panel:
 		game_over_panel.visible = false
+
+
+func set_mute_state(muted: bool) -> void:
+	if mute_button:
+		mute_button.text = "SFX: OFF [M]" if muted else "SFX: ON [M]"
+
+
+func _on_mute_pressed() -> void:
+	mute_toggled.emit()
 
 
 func _on_restart_pressed() -> void:

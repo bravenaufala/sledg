@@ -185,3 +185,16 @@ Modular visual materials, water-ice shader settings, roadside landmarks, particl
    - `TrackSpawner` assigns `water_ice.gdshader` (`ShaderMaterial` with Fresnel rim glow + procedural scrolling `UV`/`TIME` ripples, `gl_compatibility`-safe) when `biome.use_water_ice_shader` is `true`, and falls back to `biome.track_material` (`StandardMaterial3D`) for matte surfaces like `golden_hayfield`.
    - `TrackChunk/RoadsideProps` (`Node3D`, strictly visual primitives, zero `CollisionShape3D`) places biome landmarks safely outside the rails (`abs(x) >= 8.9`), keeps Torii gate crossbars `y >= 9.0`, and spawns a guaranteed `TransitionToriiGate` ahead of the player on every `1500m` biome transition.
    - `Main.set_active_biome()` calls `Player.set_spray_color(biome.spray_color)` so `SnowSpray` dynamically switches between icy white-cyan mist, golden hay straw, and glowing cyan frost.
+
+---
+
+## 7. Checkpoint C — Web-Safe Audio Architecture (`AudioManager`)
+
+1. **`AudioManager` (`res://audio/audio_manager.gd`, child node of `/Main`)**:
+   - Synthesizes lightweight mono 16-bit `AudioStreamWAV` (`mix_rate = 22050`) buffers once during `_ready()` (zero `AudioStreamGenerator` threads, crackle-free under single-threaded WebGL `gl_compatibility`).
+   - Exposes `@export var custom_bgm: AudioStream` to swap in external `.ogg`/`.wav` BGM seamlessly while defaulting to the pre-baked 8-second Japanese Yo pentatonic loop on `BgmPlayer` (`-10.0 dB`).
+   - Instantiates dedicated `AudioStreamPlayer` children (`BgmPlayer`, `SlideLoopPlayer`, `BoostPlayer`, `ShieldPickupPlayer`, `ShieldBreakPlayer`, `RampPlayer`, `LandingPlayer`, `BiomePlayer`, `CrashPlayer`).
+   - Handles browser Web autoplay restrictions by calling `unlock_audio()` on the first key/mouse/touch event and toggles Master bus mute (`toggle_mute()`) via key `M` or `HUD/MuteButton` (`mute_changed` / `mute_toggled`).
+2. **Gameplay Integration Hooks**:
+   - `Main._physics_process()` drives `AudioManager.update_slide_loop(downhill_speed, current_carve_ratio, grounded, active, delta)` every frame so the filtered carving noise scales with speed/carving while grounded and fades smoothly when airborne or crashed.
+   - `Player` emits `ramp_launched` and `landed(impact)` (`_air_time > 0.12`), alongside boost, shield pickup/shatter, biome transition, crash, and restart hooks wired in `Main`.
