@@ -153,26 +153,35 @@ Phase 2 leaves three small, zero-overhead hooks so Phase 3 power-ups drop in wit
 
 ---
 
-## 6. Phase 4 Extension Hooks — Multiple Biomes & Maps
+## 6. Phase 4 & Checkpoint B — Biomes, Water-Ice Shader & Roadside Landmarks
 
-Phase 2 isolates visual materials, physics friction, and chunk templates behind a `BiomeData` resource contract so Phase 4 can switch maps or transition biomes mid-run:
+Modular visual materials, water-ice shader settings, roadside landmarks, particle spray tinting, and physics friction live behind `BiomeData` so runs transition biomes every `1500m`:
 
 1. **`BiomeData` Resource (`res://data/biome_data.gd`)**:
    ```gdscript
+   @tool
    class_name BiomeData
    extends Resource
 
-   @export var biome_id: StringName = &"alpine_ice"
+   @export var biome_id: String = "kyoto_ice"
+   @export var display_name: String = "KYOTO WATER-ICE"
+   @export var use_water_ice_shader: bool = true
+   @export var spray_color: Color = Color(0.82, 0.96, 1.0, 1.0)
    @export var track_material: Material
    @export var rail_material: Material
    @export var obstacle_material: Material
-   @export var sky_top_color: Color = Color(0.38, 0.45, 0.55)
-   @export var ice_friction: float = 0.12
+   @export var water_ice_albedo: Color = Color(0.54, 0.84, 0.97, 1.0)
+   @export var water_ice_shimmer: Color = Color(0.90, 0.99, 1.0, 1.0)
+   @export var water_ice_roughness: float = 0.10
+   @export var water_ice_fresnel_strength: float = 0.55
+   @export var sky_top_color: Color = Color(0.32, 0.50, 0.68, 1.0)
+   @export var sky_horizon_color: Color = Color(0.68, 0.84, 0.94, 1.0)
+   @export var ice_friction: float = 0.10
    @export var slope_angle_deg: float = -16.0
    @export var chunk_variants: Array[PackedScene] = []
    @export var obstacle_variants: Array[PackedScene] = []
    ```
-2. **Spawner & Chunk Biome Hook (`track_spawner.gd` & `track_chunk.gd`)**:
-   - `TrackSpawner` holds `@export var current_biome: BiomeData` (defaulting to Phase 2's built-in icy greybox palette when `null`).
-   - Whenever a `TrackChunk` is spawned or recycled, `TrackSpawner` calls `chunk.configure_for_biome(current_biome)` and supports reading `current_biome.chunk_variants` and `current_biome.slope_angle_deg`.
-   - `TrackChunk.get_ice_friction()` provides per-biome surface friction without modifying `player.gd`.
+2. **Spawner, Shader, & Roadside Prop Hooks (`track_spawner.gd`, `track_chunk.gd`, `shaders/water_ice.gdshader`)**:
+   - `TrackSpawner` assigns `water_ice.gdshader` (`ShaderMaterial` with Fresnel rim glow + procedural scrolling `UV`/`TIME` ripples, `gl_compatibility`-safe) when `biome.use_water_ice_shader` is `true`, and falls back to `biome.track_material` (`StandardMaterial3D`) for matte surfaces like `golden_hayfield`.
+   - `TrackChunk/RoadsideProps` (`Node3D`, strictly visual primitives, zero `CollisionShape3D`) places biome landmarks safely outside the rails (`abs(x) >= 8.9`), keeps Torii gate crossbars `y >= 9.0`, and spawns a guaranteed `TransitionToriiGate` ahead of the player on every `1500m` biome transition.
+   - `Main.set_active_biome()` calls `Player.set_spray_color(biome.spray_color)` so `SnowSpray` dynamically switches between icy white-cyan mist, golden hay straw, and glowing cyan frost.

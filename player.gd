@@ -54,6 +54,7 @@ var _camera_dip_offset: float = 0.0
 var _camera_dip_velocity: float = 0.0
 var _air_time: float = 0.0
 var _prev_vertical_velocity: float = 0.0
+var current_spray_color: Color = Color(0.82, 0.96, 1.0, 1.0)
 var _spray_mat: ParticleProcessMaterial = null
 
 @onready var visual: Node3D = $SledVisual
@@ -67,7 +68,11 @@ func _ready() -> void:
 	wall_min_slide_angle = 0.0
 	floor_snap_length = 0.15
 	if snow_spray:
-		_spray_mat = snow_spray.process_material as ParticleProcessMaterial
+		var base_mat := snow_spray.process_material as ParticleProcessMaterial
+		if base_mat:
+			_spray_mat = base_mat.duplicate() as ParticleProcessMaterial
+			_spray_mat.color = current_spray_color
+			snow_spray.process_material = _spray_mat
 	if cam:
 		base_fov = min_fov
 		cam.fov = min_fov
@@ -316,12 +321,23 @@ func reset_to_start(start_transform: Transform3D) -> void:
 		_spray_mat.initial_velocity_max = BASE_SPRAY_VEL_MAX
 		_spray_mat.spread = BASE_SPRAY_SPREAD
 		_spray_mat.direction = Vector3(0.0, 0.45, 1.0).normalized()
+		_spray_mat.color = current_spray_color
 	if visual:
 		visual.rotation = Vector3.ZERO
 	if cam:
 		cam.fov = min_fov
 		cam.global_position = global_position + camera_offset
 		cam.look_at(global_position + camera_look_ahead, Vector3.UP)
+
+
+func set_spray_color(color: Color) -> void:
+	current_spray_color = color
+	if _spray_mat:
+		_spray_mat.color = color
+
+
+func get_spray_color() -> Color:
+	return current_spray_color
 
 
 func shift_origin(offset: Vector3) -> void:

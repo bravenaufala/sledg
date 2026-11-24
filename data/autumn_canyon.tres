@@ -2,27 +2,32 @@
 
 [ext_resource type="Script" uid="uid://5g5rwxpba5b5" path="res://data/biome_data.gd" id="1_usswk"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_usswk"]
+albedo_color = Color(0.68, 0.22, 0.14, 1)
+roughness = 0.65
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2eyd1"]
-albedo_color = Color(0.2901961, 0.13725491, 0.06666667, 1)
-roughness = 0.5
+albedo_color = Color(0.42, 0.25, 0.13, 1)
+roughness = 0.82
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iiex5"]
-albedo_color = Color(0.43137255, 0.17254902, 0.105882354, 1)
-roughness = 0.45
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iuide"]
-albedo_color = Color(0.827451, 0.45882353, 0.2627451, 1)
-metallic = 0.08
-roughness = 0.25
+albedo_color = Color(0.84, 0.68, 0.34, 1)
+roughness = 0.88
 
 [resource]
 script = ExtResource("1_usswk")
-biome_id = &"autumn_canyon"
-display_name = "AUTUMN CANYON"
-track_material = SubResource("StandardMaterial3D_iuide")
-rail_material = SubResource("StandardMaterial3D_iiex5")
-obstacle_material = SubResource("StandardMaterial3D_2eyd1")
-sky_top_color = Color(0.5568628, 0.23137255, 0.18039216, 1)
-sky_horizon_color = Color(0.9529412, 0.6117647, 0.25882354, 1)
-ice_friction = 0.18
+biome_id = "golden_hayfield"
+display_name = "GOLDEN HAYFIELD"
+use_water_ice_shader = false
+spray_color = Color(0.96, 0.8, 0.35, 1)
+track_material = SubResource("StandardMaterial3D_iiex5")
+rail_material = SubResource("StandardMaterial3D_2eyd1")
+obstacle_material = SubResource("StandardMaterial3D_usswk")
+water_ice_albedo = Color(0.84, 0.68, 0.34, 1)
+water_ice_shimmer = Color(0.95, 0.75, 0.4, 1)
+water_ice_roughness = 0.88
+water_ice_fresnel_strength = 0.0
+sky_top_color = Color(0.36, 0.54, 0.78, 1)
+sky_horizon_color = Color(0.98, 0.76, 0.44, 1)
+ice_friction = 0.17
 slope_angle_deg = -18.0

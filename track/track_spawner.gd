@@ -12,6 +12,7 @@ const DEFAULT_RAMP_CHUNK := preload("res://track/track_chunk_ramp.tscn")
 
 var active_chunks: Array[Node3D] = []
 var total_chunks_spawned: int = 0
+var _pending_transition_gate: bool = false
 var rng := RandomNumberGenerator.new()
 
 
@@ -21,12 +22,34 @@ func _ready() -> void:
 		chunk_variants = [DEFAULT_STANDARD_CHUNK, DEFAULT_RAMP_CHUNK]
 
 
-func set_biome(biome: BiomeData, apply_to_active: bool = true) -> void:
+func set_biome(biome: BiomeData, apply_to_active: bool = true, is_transition: bool = false, player_z: float = 0.0) -> void:
 	current_biome = biome
 	if biome != null:
 		slope_angle_deg = biome.slope_angle_deg
 	if not apply_to_active or biome == null or active_chunks.is_empty():
+		if is_transition:
+			_pending_transition_gate = true
 		return
+
+	var player_chunk: Node3D = null
+	for c in active_chunks:
+		if not is_instance_valid(c):
+			continue
+		var em := c.get_node_or_null("ExitMarker") as Marker3D
+		if em and em.global_position.z <= player_z:
+			player_chunk = c
+			break
+	if player_chunk == null:
+		for c in active_chunks:
+			if is_instance_valid(c):
+				player_chunk = c
+				break
+
+	var old_anchor := Vector3.ZERO
+	if player_chunk:
+		var old_z_along: float = clampf((player_z - player_chunk.global_position.z) / maxf(0.1, player_chunk.global_transform.basis.z.z), -80.0, 0.0)
+		old_anchor = player_chunk.to_global(Vector3(0.0, 0.0, old_z_along))
+
 	var pitch := deg_to_rad(slope_angle_deg)
 	for i in active_chunks.size():
 		var chunk: Node3D = active_chunks[i]
@@ -41,6 +64,29 @@ func set_biome(biome: BiomeData, apply_to_active: bool = true) -> void:
 		if chunk.has_method("configure_for_biome"):
 			chunk.configure_for_biome(biome)
 
+	if player_chunk:
+		var new_z_along: float = clampf((player_z - player_chunk.global_position.z) / maxf(0.1, player_chunk.global_transform.basis.z.z), -80.0, 0.0)
+		var new_anchor: Vector3 = player_chunk.to_global(Vector3(0.0, 0.0, new_z_along))
+		var delta_anchor := Vector3(0.0, old_anchor.y - new_anchor.y, old_anchor.z - new_anchor.z)
+		for chunk in active_chunks:
+			if is_instance_valid(chunk):
+				chunk.global_position += delta_anchor
+
+	if is_transition:
+		var gate_chunk: Node3D = null
+		for chunk in active_chunks:
+			if not is_instance_valid(chunk):
+				continue
+			var gate_world_z: float = (chunk.global_transform * Vector3(0.0, 0.0, -16.0)).z
+			if gate_world_z <= player_z - 12.0:
+				gate_chunk = chunk
+				break
+		if gate_chunk and gate_chunk.has_method("spawn_transition_torii_gate"):
+			gate_chunk.spawn_transition_torii_gate()
+			_pending_transition_gate = false
+		else:
+			_pending_transition_gate = true
+
 
 func reset_track() -> void:
 	for chunk in active_chunks:
@@ -48,6 +94,7 @@ func reset_track() -> void:
 			chunk.queue_free()
 	active_chunks.clear()
 	total_chunks_spawned = 0
+	_pending_transition_gate = false
 
 	if chunk_variants.is_empty():
 		chunk_variants = [DEFAULT_STANDARD_CHUNK, DEFAULT_RAMP_CHUNK]
@@ -91,6 +138,10 @@ func _spawn_next_chunk(difficulty: float) -> void:
 	var is_safe := total_chunks_spawned < safe_start_chunks
 	if chunk.has_method("populate_chunk"):
 		chunk.populate_chunk(difficulty, is_safe, rng, total_chunks_spawned)
+
+	if _pending_transition_gate and chunk.has_method("spawn_transition_torii_gate"):
+		_pending_transition_gate = false
+		chunk.spawn_transition_torii_gate()
 
 	active_chunks.append(chunk)
 	total_chunks_spawned += 1

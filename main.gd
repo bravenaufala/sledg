@@ -43,9 +43,11 @@ func _physics_process(delta: float) -> void:
 	var sky_mat := _get_sky_material()
 	if sky_mat:
 		var sky_t := 1.0 - exp(-sky_lerp_speed * delta)
+		var target_ground_bottom := target_sky_horizon_color.darkened(0.42)
 		sky_mat.sky_top_color = sky_mat.sky_top_color.lerp(target_sky_top_color, sky_t)
 		sky_mat.sky_horizon_color = sky_mat.sky_horizon_color.lerp(target_sky_horizon_color, sky_t)
 		sky_mat.ground_horizon_color = sky_mat.ground_horizon_color.lerp(target_sky_horizon_color, sky_t)
+		sky_mat.ground_bottom_color = sky_mat.ground_bottom_color.lerp(target_ground_bottom, sky_t)
 
 	if run_state == RunState.RUNNING:
 		total_distance += player.downhill_speed * delta
@@ -82,9 +84,12 @@ func set_active_biome(index: int, announce: bool = true) -> void:
 	if biome == null:
 		return
 	if track_spawner and track_spawner.has_method("set_biome"):
-		track_spawner.set_biome(biome, true)
+		var player_z: float = player.global_position.z if player else 0.0
+		track_spawner.set_biome(biome, true, announce, player_z)
 	if player:
 		player.ice_friction = biome.ice_friction
+		if player.has_method("set_spray_color"):
+			player.set_spray_color(biome.spray_color)
 	target_sky_top_color = biome.sky_top_color
 	target_sky_horizon_color = biome.sky_horizon_color
 	if not announce:
@@ -93,6 +98,7 @@ func set_active_biome(index: int, announce: bool = true) -> void:
 			sky_mat.sky_top_color = target_sky_top_color
 			sky_mat.sky_horizon_color = target_sky_horizon_color
 			sky_mat.ground_horizon_color = target_sky_horizon_color
+			sky_mat.ground_bottom_color = target_sky_horizon_color.darkened(0.42)
 	elif hud:
 		hud.show_status("ENTERING: %s" % biome.display_name, 2.2)
 

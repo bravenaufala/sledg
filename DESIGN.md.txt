@@ -16,14 +16,13 @@
 - Do not add menus, score systems, or procedural chunk spawning until Phase 1 is approved.
 
 
-## Phase 4: Biomes, Dynamic Transitions & Visual Polish
+## Phase 4 & Checkpoint B: Japanese Water-Ice to Golden Hayfield Overhaul
 - **3 `BiomeData` Presets (`res://data/*.tres`)**:
-  - `alpine_ice.tres`: Crisp icy blue track (`#a8d8f0`), slate rails (`#5c7080`), crimson obstacles (`#c0392b`), `ice_friction = 0.12`, `slope_angle_deg = -16.0`, cool alpine sky (`#3b6998` top / `#a8cce0` horizon).
-  - `autumn_canyon.tres`: Warm amber/terracotta track (`#d37543`), deep canyon rails (`#6e2c1b`), dark rock obstacles (`#4a2311`), `ice_friction = 0.18`, `slope_angle_deg = -18.0`, warm sunset sky (`#8e3b2e` top / `#f39c42` horizon).
-  - `midnight_glacier.tres`: Dark obsidian track (`#1c2430`), glowing cyan rails (`#00e5ff`), magenta neon hazards (`#ff2a6d`), `ice_friction = 0.06`, `slope_angle_deg = -16.0`, deep night sky (`#090e1a` top / `#182b49` horizon).
-- **Dynamic Distance-Based Biome Transitions**:
-  - `Main` cycles automatically through `[alpine_ice, autumn_canyon, midnight_glacier]` every `1500m` of distance (`biome_cycle_distance = 1500.0`).
-  - Transitions update `TrackSpawner` (`set_biome()`), `Player.ice_friction`, active chunk materials and slope angles, smoothly lerp `WorldEnvironment` procedural sky colors, and flash an `"ENTERING: <BIOME NAME>"` HUD banner.
+  - `alpine_ice.tres` (**KYOTO WATER-ICE**, `biome_id = "kyoto_ice"`): Glossy icy-cyan WebGL-safe shader track, snow-dusted pines, glowing stone lanterns, occasional vermilion Torii gates (`y >= 9.0` clearance), `ice_friction = 0.10`, `slope_angle_deg = -16.0`, cool alpine sky, icy mist spray `Color(0.82, 0.96, 1.0)`.
+  - `autumn_canyon.tres` (**GOLDEN HAYFIELD**, `biome_id = "golden_hayfield"`): Warm sunlit golden-straw/dirt matte `StandardMaterial3D` track, wooden ranch fences, stacked golden round hay bales, occasional pitched-roof red barns, `ice_friction = 0.17`, `slope_angle_deg = -18.0`, golden-hour sky, golden straw spray `Color(0.96, 0.80, 0.35)`.
+  - `midnight_glacier.tres` (**MIDNIGHT SHRINE**, `biome_id = "midnight_shrine"`): Dark obsidian-blue glossy shader ice track, glowing cyan rails, dark pine silhouettes, warm/cyan paper lanterns, dark-vermilion Torii gates, `ice_friction = 0.06`, `slope_angle_deg = -16.0`, deep indigo night sky, glowing cyan frost spray `Color(0.45, 0.92, 1.0)`.
+- **Dynamic Distance-Based Biome Transitions & Transition Torii Gates**:
+  - `Main` cycles automatically through `[alpine_ice, autumn_canyon, midnight_glacier]` every `1500m` (`biome_cycle_distance = 1500.0`).
+  - Transitions update `TrackSpawner` (`set_biome()`), `Player.ice_friction`, `Player.set_spray_color()`, `RoadsideProps` (spawning a guaranteed grand `TransitionToriiGate` across the chunk ahead), smoothly lerp `WorldEnvironment` sky colors, and show `"ENTERING: <BIOME NAME>"` on HUD.
 - **Visual Polish & Web Export Readiness**:
-  - Stylized low-poly sled (`MeshInstance3D` deck, tapered `PrismMesh` nose, twin metallic runners, rider + helmet) and faceted 6-sided low-poly spire obstacles (`CylinderMesh` tiered spire).
-  - Configured `gl_compatibility` renderer (`rendering/renderer/rendering_method` and `rendering_method.mobile`) for clean Web / itch.io export.
+  - Web-safe `res://shaders/water_ice.gdshader` (albedo, low roughness `0.08–0.10`, high specular sheen, Fresnel rim highlight, procedural UV+TIME shimmer) plus visual-only low-poly `RoadsideProps`, compatible with the `gl_compatibility` WebGL renderer.

@@ -2,23 +2,24 @@
 
 [ext_resource type="Script" uid="uid://5g5rwxpba5b5" path="res://data/biome_data.gd" id="1_x5a5i"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x5a5i"]
+albedo_color = Color(0.72, 0.16, 0.14, 1)
+roughness = 0.38
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_77n1f"]
-albedo_color = Color(0.7529412, 0.22352941, 0.16862746, 1)
-roughness = 0.35
+albedo_color = Color(0.2, 0.36, 0.48, 1)
+roughness = 0.45
+emission_enabled = true
+emission = Color(0.12, 0.36, 0.52, 1)
+emission_energy_multiplier = 0.35
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6s3o7"]
-albedo_color = Color(0.36078432, 0.4392157, 0.5019608, 1)
-roughness = 0.4
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pudqn"]
-albedo_color = Color(0.65882355, 0.84705883, 0.9411765, 1)
-metallic = 0.1
-roughness = 0.15
+albedo_color = Color(0.54, 0.84, 0.97, 1)
+metallic = 0.08
+roughness = 0.12
 
 [resource]
 script = ExtResource("1_x5a5i")
-track_material = SubResource("StandardMaterial3D_pudqn")
-rail_material = SubResource("StandardMaterial3D_6s3o7")
-obstacle_material = SubResource("StandardMaterial3D_77n1f")
-sky_top_color = Color(0.23137255, 0.4117647, 0.59607846, 1)
-sky_horizon_color = Color(0.65882355, 0.8, 0.8784314, 1)
+track_material = SubResource("StandardMaterial3D_6s3o7")
+rail_material = SubResource("StandardMaterial3D_77n1f")
+obstacle_material = SubResource("StandardMaterial3D_x5a5i")

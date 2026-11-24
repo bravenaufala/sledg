@@ -2,32 +2,37 @@
 
 [ext_resource type="Script" uid="uid://5g5rwxpba5b5" path="res://data/biome_data.gd" id="1_fjbsk"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xtvwk"]
-albedo_color = Color(1, 0.16470589, 0.42745098, 1)
-roughness = 0.25
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fjbsk"]
+albedo_color = Color(0.78, 0.24, 0.28, 1)
+roughness = 0.35
 emission_enabled = true
-emission = Color(1, 0.16470589, 0.42745098, 1)
-emission_energy_multiplier = 0.35
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ycwu3"]
-albedo_color = Color(0, 0.8980392, 1, 1)
-roughness = 0.15
-emission_enabled = true
-emission = Color(0, 0.8980392, 1, 1)
+emission = Color(0.35, 0.06, 0.1, 1)
 emission_energy_multiplier = 0.5
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ab4lu"]
-albedo_color = Color(0.10980392, 0.14117648, 0.1882353, 1)
-metallic = 0.35
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xtvwk"]
+albedo_color = Color(0.1, 0.78, 0.95, 1)
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.18, 0.88, 1, 1)
+emission_energy_multiplier = 1.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ycwu3"]
+albedo_color = Color(0.06, 0.12, 0.22, 1)
+metallic = 0.12
 roughness = 0.1
 
 [resource]
 script = ExtResource("1_fjbsk")
-biome_id = &"midnight_glacier"
-display_name = "MIDNIGHT GLACIER"
-track_material = SubResource("StandardMaterial3D_ab4lu")
-rail_material = SubResource("StandardMaterial3D_ycwu3")
-obstacle_material = SubResource("StandardMaterial3D_xtvwk")
-sky_top_color = Color(0.03529412, 0.05490196, 0.101960786, 1)
-sky_horizon_color = Color(0.09411765, 0.16862746, 0.28627452, 1)
+biome_id = "midnight_shrine"
+display_name = "MIDNIGHT SHRINE"
+spray_color = Color(0.45, 0.92, 1, 1)
+track_material = SubResource("StandardMaterial3D_ycwu3")
+rail_material = SubResource("StandardMaterial3D_xtvwk")
+obstacle_material = SubResource("StandardMaterial3D_fjbsk")
+water_ice_albedo = Color(0.06, 0.12, 0.22, 1)
+water_ice_shimmer = Color(0.24, 0.88, 1, 1)
+water_ice_roughness = 0.08
+water_ice_fresnel_strength = 0.75
+sky_top_color = Color(0.03, 0.05, 0.14, 1)
+sky_horizon_color = Color(0.11, 0.16, 0.34, 1)
 ice_friction = 0.06
