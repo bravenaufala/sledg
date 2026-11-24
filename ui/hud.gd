@@ -8,6 +8,7 @@ signal restart_requested()
 @onready var game_over_panel: Control = $GameOverPanel
 @onready var final_score_label: Label = $GameOverPanel/VBox/FinalScoreLabel
 @onready var restart_button: Button = $GameOverPanel/VBox/RestartButton
+@onready var speed_lines: Control = $SpeedLinesOverlay
 
 var _last_displayed_score: int = -1
 var _last_displayed_bonus: int = -1
@@ -55,6 +56,18 @@ func update_score(score: int, distance_m: int, bonus: int) -> void:
 			score_label.text = "SCORE: %d" % score
 
 
+func update_speed_effect(downhill_speed: float, boost_stacks: int) -> void:
+	if not speed_lines:
+		return
+	if downhill_speed > 45.0 or boost_stacks > 0:
+		var speed_alpha := clampf((downhill_speed - 45.0) / 75.0, 0.0, 1.0)
+		var boost_alpha := clampf(float(boost_stacks) * 0.28, 0.0, 1.0)
+		var target := maxf(speed_alpha, boost_alpha)
+		speed_lines.call("set_speed_intensity", target)
+	else:
+		speed_lines.call("set_speed_intensity", 0.0)
+
+
 func show_status(text: String, duration: float = 1.5) -> void:
 	if status_label:
 		status_label.text = text
@@ -85,6 +98,7 @@ func reset_powerups() -> void:
 	_boost_stacks = 0
 	_boost_remaining = 0.0
 	_refresh_powerup_label()
+	update_speed_effect(0.0, 0)
 
 
 func _refresh_powerup_label() -> void:
@@ -100,6 +114,7 @@ func _refresh_powerup_label() -> void:
 
 
 func show_game_over(final_score: int, distance_m: int, bonus: int, shields_used: int = 0) -> void:
+	update_speed_effect(0.0, 0)
 	if final_score_label:
 		final_score_label.text = "Score: %d (%dm + %d bonus | Shields Used: %d)" % [
 			final_score,

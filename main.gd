@@ -56,6 +56,7 @@ func _physics_process(delta: float) -> void:
 				set_active_biome(desired_biome_idx, true)
 		if hud:
 			hud.update_score(score, int(total_distance), bonus_points)
+			hud.update_speed_effect(player.downhill_speed, player.boost_stacks)
 		if track_spawner:
 			track_spawner.update_spawner(player.global_position, total_distance)
 		if player and player.global_position.length() > FLOATING_ORIGIN_THRESHOLD:

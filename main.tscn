@@ -128,7 +128,7 @@ mesh = SubResource("CapsuleMesh_vivmo")
 
 [node name="SnowSpray" type="GPUParticles3D" parent="Player/SledVisual" unique_id=267200431]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0.95)
-amount = 28
+amount = 44
 lifetime = 0.45
 process_material = SubResource("ParticleProcessMaterial_1bvp3")
 draw_pass_1 = SubResource("QuadMesh_7mycd")
@@ -161,6 +161,7 @@ mesh = SubResource("SphereMesh_ycdy4")
 [node name="Camera3D" type="Camera3D" parent="Player" unique_id=555759631]
 transform = Transform3D(1, 0, 0, 0, 0.9360728, 0.35180622, 0, -0.35180622, 0.9360728, 0, 4.2, 6.5)
 current = true
+fov = 70.0
 
 [node name="TrackSpawner" type="Node3D" parent="." unique_id=977604809]
 script = ExtResource("3_lquwl")

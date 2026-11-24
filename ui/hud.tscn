@@ -1,9 +1,18 @@
 [gd_scene format=3 uid="uid://cmmvwpmmiv4ew"]
 
 [ext_resource type="Script" uid="uid://3rqdwg8ott3j" path="res://ui/hud.gd" id="1_rbyyf"]
+[ext_resource type="Script" uid="uid://blkf471p27ly1" path="res://ui/speed_lines.gd" id="2_276te"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1678660146]
 script = ExtResource("1_rbyyf")
+
+[node name="SpeedLinesOverlay" type="Control" parent="." unique_id=213050214]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("2_276te")
 
 [node name="ScoreLabel" type="Label" parent="." unique_id=468728476]
 offset_left = 24.0
